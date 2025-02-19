@@ -1,0 +1,517 @@
+/* CricketRunRateCalculator.css */
+.cricket-calculator {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    max-width: 550px;
+    margin: 0 auto;
+    padding: 15px;
+    background-color: #f7f9fc;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  }
+  
+  .scoreboard {
+    background: linear-gradient(135deg, #0c4da2 0%, #1565c0 100%);
+    color: white;
+    padding: 14px;
+    border-radius: 10px;
+    margin-bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  }
+  
+  .main-score {
+    text-align: center;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+  }
+  
+  .main-score h1 {
+    font-size: 2.5rem;
+    margin: 0;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+  
+  .overs-display {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  
+  .main-score h2 {
+    font-size: 1.3rem;
+    margin: 0;
+    opacity: 0.9;
+  }
+  
+  .edit-btn {
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 0.9rem;
+    cursor: pointer;
+    padding: 3px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+  }
+  
+  .edit-btn:hover {
+    opacity: 1;
+  }
+  
+  .target-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 8px 0;
+    background-color: rgba(255, 255, 255, 0.15);
+    padding: 6px 10px;
+    border-radius: 6px;
+  }
+  
+  .target-info h3 {
+    margin: 0;
+    font-weight: 600;
+    font-size: 1rem;
+  }
+  
+  .run-rates {
+    display: flex;
+    gap: 16px;
+  }
+  
+  .run-rates p {
+    margin: 0;
+    font-size: 0.9rem;
+  }
+  
+  .highlight {
+    color: #4fc3f7;
+    font-weight: bold;
+  }
+  
+  .danger {
+    color: #ff7043;
+    font-weight: bold;
+  }
+  
+  .warning {
+    color: #ffee58;
+    font-weight: bold;
+  }
+  
+  .success {
+    color: #81c784;
+    font-weight: bold;
+  }
+  
+  .match-status {
+    text-align: center;
+    margin-top: 6px;
+    font-size: 1rem;
+  }
+  
+  .match-status p {
+    margin: 4px 0;
+  }
+  
+  .overs-remaining {
+    font-size: 0.85rem;
+    opacity: 0.8;
+  }
+  
+  .last-over {
+    background-color: white;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  }
+  
+  .over-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  
+  .last-over h3 {
+    margin: 0;
+    color: #0c4da2;
+    font-size: 1rem;
+  }
+  
+  .undo-btn {
+    background-color: transparent;
+    border: none;
+    color: #455a64;
+    font-size: 0.85rem;
+    padding: 4px 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+  }
+  
+  .undo-btn:hover:not(:disabled) {
+    background-color: #f0f0f0;
+  }
+  
+  .undo-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  .balls-container {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    min-height: 28px;
+  }
+  
+  .ball-result {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background-color: #e0e0e0;
+    font-weight: bold;
+    color: #333;
+    font-size: 0.9rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  
+  .empty-over {
+    color: #9e9e9e;
+    font-style: italic;
+    margin: 0;
+  }
+  
+  .wicket {
+    background-color: #e53935;
+    color: white;
+  }
+  
+  .boundary {
+    background-color: #1e88e5;
+    color: white;
+  }
+  
+  .extra {
+    background-color: #ff9800;
+    color: white;
+  }
+  
+  .settings-panel {
+    background-color: white;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  }
+  
+  .input-group {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  
+  .input-group label {
+    margin-right: 8px;
+    font-weight: 500;
+    min-width: 60px;
+    color: #455a64;
+    font-size: 0.9rem;
+  }
+  
+  .input-group input, .input-group select {
+    padding: 6px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    width: 70px;
+    font-size: 0.9rem;
+  }
+  
+  .reset-btn {
+    background-color: #e53935;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s;
+    font-size: 0.9rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  
+  .reset-btn:hover {
+    background-color: #c62828;
+  }
+  
+  .run-buttons {
+    background-color: white;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  }
+  
+  .normal-runs {
+    display: flex;
+    justify-content: space-between;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+  
+  .run-btn {
+    flex: 1;
+    padding: 10px 0;
+    border: none;
+    border-radius: 6px;
+    background-color: #f0f2f5;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  
+  .run-btn:hover {
+    background-color: #e0e0e0;
+    transform: translateY(-1px);
+  }
+  
+  .boundary-btn {
+    background-color: #1e88e5;
+    color: white;
+  }
+  
+  .boundary-btn:hover {
+    background-color: #1976d2;
+  }
+  
+  .special-buttons {
+    display: flex;
+    gap: 8px;
+  }
+  
+  .extra-btn {
+    flex: 1;
+    padding: 8px 0;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.9rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  
+  .wide-btn, .no-ball-btn {
+    background-color: #ff9800;
+    color: white;
+  }
+  
+  .wide-btn:hover, .no-ball-btn:hover {
+    background-color: #f57c00;
+    transform: translateY(-1px);
+  }
+  
+  .wicket-btn {
+    flex: 1;
+    padding: 8px 0;
+    border: none;
+    border-radius: 6px;
+    background-color: #e53935;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.9rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  
+  .wicket-btn:hover {
+    background-color: #d32f2f;
+    transform: translateY(-1px);
+  }
+  
+  .match-history {
+    background-color: white;
+    padding: 12px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  }
+  
+  .match-history h3 {
+    margin-top: 0;
+    margin-bottom: 8px;
+    color: #0c4da2;
+    font-size: 1rem;
+  }
+  
+  .history-container {
+    min-height: 40px;
+    max-height: 80px;
+    overflow-y: auto;
+    padding: 8px;
+    background-color: #f9f9fc;
+    border-radius: 4px;
+    border: 1px solid #f0f0f0;
+  }
+  
+  .empty-history {
+    color: #9e9e9e;
+    text-align: center;
+    font-style: italic;
+    margin: 0;
+  }
+  
+  .history-balls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+  
+  .history-ball {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background-color: #e0e0e0;
+    font-size: 0.8rem;
+    font-weight: bold;
+    color: #333;
+  }
+  
+  /* Edit panel styles */
+  .edit-panel {
+    background-color: white;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  }
+  
+  .edit-panel h3 {
+    margin-top: 0;
+    margin-bottom: 12px;
+    color: #0c4da2;
+    font-size: 1rem;
+    text-align: center;
+  }
+  
+  .edit-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  
+  .edit-field {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .edit-field label {
+    font-size: 0.9rem;
+    margin-bottom: 4px;
+    color: #455a64;
+  }
+  
+  .edit-field input {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+  
+  .edit-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 16px;
+  }
+  
+  .cancel-btn {
+    background-color: #e0e0e0;
+    color: #333;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s;
+  }
+  
+  .cancel-btn:hover {
+    background-color: #d5d5d5;
+  }
+  
+  .save-btn {
+    background-color: #4caf50;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s;
+  }
+  
+  .save-btn:hover {
+    background-color: #43a047;
+  }
+  
+  @media (max-width: 480px) {
+    .cricket-calculator {
+      padding: 10px;
+    }
+    
+    .run-buttons {
+      padding: 10px;
+    }
+    
+    .normal-runs {
+      flex-wrap: wrap;
+    }
+    
+    .run-btn {
+      min-width: 40px;
+      font-size: 1rem;
+      padding: 8px 0;
+    }
+    
+    .special-buttons {
+      flex-wrap: wrap;
+    }
+    
+    .main-score h1 {
+      font-size: 2.2rem;
+    }
+    
+    .main-score h2 {
+      font-size: 1.1rem;
+    }
+    
+    .edit-form {
+      grid-template-columns: 1fr;
+    }
+  }
