@@ -1,9 +1,9 @@
-// CricketRunRateCalculator.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Trophy, Undo2, Edit2, RefreshCw, ChevronRight } from 'lucide-react';
 import './Runrate.css';
 
 const CricketRunRateCalculator = () => {
-  // Initialize state with localStorage values if available
+  // State initialization with localStorage
   const [currentScore, setCurrentScore] = useState(() => 
     parseInt(localStorage.getItem('cricket_score')) || 0);
   const [targetScore, setTargetScore] = useState(() => 
@@ -21,6 +21,8 @@ const CricketRunRateCalculator = () => {
   const [wickets, setWickets] = useState(() => 
     parseInt(localStorage.getItem('cricket_wickets')) || 0);
   const [editMode, setEditMode] = useState(false);
+  const [overStats, setOverStats] = useState(() => 
+    JSON.parse(localStorage.getItem('cricket_overStats')) || []);
   const [editValues, setEditValues] = useState({
     currentScore: 0,
     overs: 0,
@@ -28,7 +30,7 @@ const CricketRunRateCalculator = () => {
     wickets: 0
   });
 
-  // Save to localStorage whenever state changes
+  // Persist state to localStorage
   useEffect(() => {
     localStorage.setItem('cricket_score', currentScore);
     localStorage.setItem('cricket_target', targetScore);
@@ -38,16 +40,16 @@ const CricketRunRateCalculator = () => {
     localStorage.setItem('cricket_history', JSON.stringify(history));
     localStorage.setItem('cricket_lastOver', JSON.stringify(lastOver));
     localStorage.setItem('cricket_wickets', wickets);
-  }, [currentScore, targetScore, overs, balls, totalOvers, history, lastOver, wickets]);
-  
-  // Calculate current run rate
+    localStorage.setItem('cricket_overStats', JSON.stringify(overStats));
+  }, [currentScore, targetScore, overs, balls, totalOvers, history, lastOver, wickets, overStats]);
+
+  // Enhanced calculations and statistics
   const calculateRunRate = () => {
     const totalBalls = overs * 6 + balls;
     const totalOversFloat = totalBalls / 6;
     return totalOversFloat > 0 ? (currentScore / totalOversFloat).toFixed(2) : '0.00';
   };
-  
-  // Calculate required run rate
+
   const calculateRequiredRunRate = () => {
     if (!targetScore) return '0.00';
     
@@ -60,8 +62,66 @@ const CricketRunRateCalculator = () => {
     
     return oversRemaining > 0 ? (remainingRuns / oversRemaining).toFixed(2) : 'N/A';
   };
-  
-  // Revert last action
+
+  // Win Probability Calculation
+  const calculateWinProbability = useMemo(() => {
+    if (!targetScore) return null;
+
+    const remainingRuns = targetScore - currentScore;
+    const ballsRemaining = (totalOvers * 6) - (overs * 6 + balls);
+    const wicketsRemaining = 10 - wickets;
+
+    if (remainingRuns <= 0) return 100;
+    if (wickets >= 10 || ballsRemaining <= 0) return 0;
+
+    // Complex win probability calculation
+    const runRate = calculateRunRate();
+    const requiredRunRate = parseFloat(calculateRequiredRunRate());
+    
+    let probability = 50; // Base probability
+    
+    // Adjust based on run rate comparison
+    if (runRate > requiredRunRate) {
+      probability += 10;
+    } else {
+      probability -= 10;
+    }
+    
+    // Wickets factor
+    probability += (wicketsRemaining * 3);
+    
+    // Balls remaining factor
+    const ballFactor = Math.min(ballsRemaining / 36, 1) * 20;
+    probability += ballFactor;
+
+    return Math.min(Math.max(probability, 0), 100).toFixed(1);
+  }, [currentScore, targetScore, overs, balls, wickets, totalOvers]);
+
+  // Comprehensive match status
+  const getMatchStatus = () => {
+    if (!targetScore) return "First Innings";
+    
+    const runsNeeded = targetScore - currentScore;
+    const ballsRemaining = (totalOvers * 6) - (overs * 6 + balls);
+    
+    if (runsNeeded <= 0) return "Victory!";
+    if (wickets >= 10 || ballsRemaining <= 0) return "Defeat";
+    
+    return `Need ${runsNeeded} runs from ${ballsRemaining} balls`;
+  };
+
+  // Enter Edit Mode
+  const enterEditMode = () => {
+    setEditValues({
+      currentScore,
+      overs,
+      balls,
+      wickets
+    });
+    setEditMode(true);
+  };
+
+  // Revert Last Action
   const revertLastAction = () => {
     if (history.length === 0) return;
     
@@ -100,12 +160,23 @@ const CricketRunRateCalculator = () => {
       }
     }
   };
-  
-  // Update score and advance ball count
+
+  // Reset Match
+  const resetMatch = () => {
+    setCurrentScore(0);
+    setOvers(0);
+    setBalls(0);
+    setHistory([]);
+    setLastOver([]);
+    setWickets(0);
+    setOverStats([]);
+    setTargetScore(0);
+  };
+
+  // Update score with enhanced over tracking
   const updateScore = (runs, isBoundary = false, isExtra = false) => {
     setCurrentScore(prev => prev + runs);
     
-    // Add to history
     const eventType = 
       isExtra === 'wide' ? 'WD' : 
       isExtra === 'noBall' ? 'NB' : 
@@ -115,10 +186,24 @@ const CricketRunRateCalculator = () => {
     setHistory(prev => [...prev, eventType]);
     setLastOver(prev => [...prev, eventType]);
     
-    // Don't advance ball for extras
     if (!isExtra) {
       const newBalls = balls + 1;
       if (newBalls === 6) {
+        // Calculate over summary
+        const overRunsData = {
+          overNumber: overs + 1,
+          runs: lastOver.reduce((sum, ball) => {
+            if (!['W', 'WD', 'NB'].includes(ball)) {
+              return sum + (ball === '4' ? 4 : ball === '6' ? 6 : parseInt(ball));
+            }
+            return sum;
+          }, 0),
+          wickets: lastOver.filter(ball => ball === 'W').length,
+          extras: lastOver.filter(ball => ['WD', 'NB'].includes(ball)).length
+        };
+        
+        setOverStats(prev => [...prev, overRunsData]);
+        
         setOvers(prev => prev + 1);
         setBalls(0);
         setLastOver([]);
@@ -127,62 +212,8 @@ const CricketRunRateCalculator = () => {
       }
     }
   };
-  
-  const handleWide = () => {
-    updateScore(1, false, 'wide');
-  };
-  
-  const handleNoBall = () => {
-    updateScore(1, false, 'noBall');
-  };
-  
-  const handleWicket = () => {
-    setWickets(prev => Math.min(prev + 1, 10));
-    
-    // Advance the ball
-    const newBalls = balls + 1;
-    if (newBalls === 6) {
-      setOvers(prev => prev + 1);
-      setBalls(0);
-      setLastOver([]);
-    } else {
-      setBalls(newBalls);
-    }
-    
-    // Add to history
-    setHistory(prev => [...prev, 'W']);
-    setLastOver(prev => [...prev, 'W']);
-  };
-  
-  const resetMatch = () => {
-    
-      setCurrentScore(0);
-      setOvers(0);
-      setBalls(0);
-      setHistory([]);
-      setLastOver([]);
-      setWickets(0);
-    
-  };
-  
-  const enterEditMode = () => {
-    setEditValues({
-      currentScore,
-      overs,
-      balls,
-      wickets
-    });
-    setEditMode(true);
-  };
-  
-  const saveEditValues = () => {
-    setCurrentScore(parseInt(editValues.currentScore) || 0);
-    setOvers(parseInt(editValues.overs) || 0);
-    setBalls(parseInt(editValues.balls) || 0);
-    setWickets(parseInt(editValues.wickets) || 0);
-    setEditMode(false);
-  };
-  
+
+  // Handle Edit Change
   const handleEditChange = (e) => {
     const { name, value } = e.target;
     setEditValues(prev => ({
@@ -190,56 +221,58 @@ const CricketRunRateCalculator = () => {
       [name]: value
     }));
   };
-  
-  // Calculate balls remaining
-  const ballsRemaining = (totalOvers * 6) - (overs * 6 + balls);
-  const oversRemaining = (ballsRemaining / 6).toFixed(1);
-  
-  // Calculate if the batting team is winning
-  const getMatchStatus = () => {
-    if (!targetScore) return "First Innings";
-    
-    const runsNeeded = targetScore - currentScore;
-    if (runsNeeded <= 0) return "Victory!";
-    if (wickets >= 10 || ballsRemaining <= 0) return "Defeat";
-    
-    return `Need ${runsNeeded} runs from ${ballsRemaining} balls`;
+
+  // Save Edit Values
+  const saveEditValues = () => {
+    setCurrentScore(parseInt(editValues.currentScore) || 0);
+    setOvers(parseInt(editValues.overs) || 0);
+    setBalls(parseInt(editValues.balls) || 0);
+    setWickets(parseInt(editValues.wickets) || 0);
+    setEditMode(false);
   };
-  
+
+  // Render method with enhanced UI and features
   return (
     <div className="cricket-calculator">
-      <div className="scoreboard">
-        <div className="main-score">
+    <div className="scoreboard">
+      <div className="main-score">
+        <div className="score-container">
           <h1>{currentScore}/{wickets}</h1>
           <div className="overs-display">
             <h2>{overs}.{balls} overs</h2>
             <button className="edit-btn" onClick={enterEditMode}>
-              <span role="img" aria-label="edit">✏️</span>
+              <Edit2 />
             </button>
           </div>
         </div>
-        
-        <div className="target-info">
+      </div>
+      
+      <div className="target-info">
+        {targetScore > 0 && (
+          <h3>Target: {targetScore}</h3>
+        )}
+        <div className="run-rates">
+          <p>CRR: <span className="highlight">{calculateRunRate()}</span></p>
           {targetScore > 0 && (
-            <h3>Target: {targetScore}</h3>
-          )}
-          <div className="run-rates">
-            <p>CRR: <span className="highlight">{calculateRunRate()}</span></p>
-            {targetScore > 0 && (
-              <p>RRR: <span className={calculateRequiredRunRate() > 12 ? "danger" : calculateRequiredRunRate() > 9 ? "warning" : "success"}>
-                {calculateRequiredRunRate()}
-              </span></p>
-            )}
-          </div>
-        </div>
-        
-        <div className="match-status">
-          <p>{getMatchStatus()}</p>
-          {ballsRemaining > 0 && targetScore > 0 && (
-            <p className="overs-remaining">{oversRemaining} overs remaining</p>
+            <p>RRR: <span className={
+              parseFloat(calculateRequiredRunRate()) > 12 ? "danger" : 
+              parseFloat(calculateRequiredRunRate()) > 9 ? "warning" : "success"
+            }>
+              {calculateRequiredRunRate()}
+            </span></p>
           )}
         </div>
       </div>
+      
+      <div className="match-status">
+        <p>{getMatchStatus()}</p>
+        {calculateWinProbability !== null && (
+          <p className="win-probability">
+            Win Probability: {calculateWinProbability}%
+          </p>
+        )}
+      </div>
+    </div>
       
       {editMode ? (
         <div className="edit-panel">
@@ -294,6 +327,47 @@ const CricketRunRateCalculator = () => {
         </div>
       ) : (
         <>
+              <div className="run-buttons">
+            <div className="normal-runs">
+              {[0, 1, 2, 3, 4, 5, 6].map(runs => (
+                <button
+                  key={runs}
+                  className={`run-btn ${runs === 4 || runs === 6 ? 'boundary-btn' : ''}`}
+                  onClick={() => updateScore(runs, runs === 4 || runs === 6)}
+                >
+                  {runs}
+                </button>
+              ))}
+            </div>
+            
+            <div className="special-buttons">
+              <button className="extra-btn wide-btn" onClick={() => updateScore(1, false, 'wide')}>
+                Wide
+              </button>
+              <button className="extra-btn no-ball-btn" onClick={() => updateScore(1, false, 'noBall')}>
+                No Ball
+              </button>
+              <button className="wicket-btn" onClick={() => {
+                setWickets(prev => Math.min(prev + 1, 10));
+                
+                // Advance the ball
+                const newBalls = balls + 1;
+                if (newBalls === 6) {
+                  setOvers(prev => prev + 1);
+                  setBalls(0);
+                  setLastOver([]);
+                } else {
+                  setBalls(newBalls);
+                }
+                
+                // Add to history
+                setHistory(prev => [...prev, 'W']);
+                setLastOver(prev => [...prev, 'W']);
+              }}>
+                Wicket
+              </button>
+            </div>
+          </div>
           <div className="last-over">
             <div className="over-header">
               <h3>Current Over</h3>
@@ -302,7 +376,7 @@ const CricketRunRateCalculator = () => {
                 onClick={revertLastAction}
                 disabled={history.length === 0}
               >
-                <span role="img" aria-label="undo">↩️</span> Undo
+                <Undo2 /> Undo
               </button>
             </div>
             <div className="balls-container">
@@ -323,6 +397,33 @@ const CricketRunRateCalculator = () => {
               }
             </div>
           </div>
+          
+          <div className="over-stats-container">
+        <h3>Over Statistics</h3>
+        <div className="over-stats-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Over</th>
+                <th>Runs</th>
+                <th>Wickets</th>
+                <th>Extras</th>
+              </tr>
+            </thead>
+            <tbody>
+              {overStats.map((over, index) => (
+                <tr key={index}>
+                  <td>{over.overNumber}</td>
+                  <td>{over.runs}</td>
+                  <td>{over.wickets}</td>
+                  <td>{over.extras}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
           
           <div className="settings-panel">
             <div className="input-group">
@@ -348,36 +449,12 @@ const CricketRunRateCalculator = () => {
               />
             </div>
             
-            <button className="reset-btn" onClick={resetMatch}>
-              Reset Match
+            <button className="reset-btn" onClick={resetMatch} label="reset match">
+              <RefreshCw />
             </button>
           </div>
           
-          <div className="run-buttons">
-            <div className="normal-runs">
-              {[0, 1, 2, 3, 4, 5, 6].map(runs => (
-                <button
-                  key={runs}
-                  className={`run-btn ${runs === 4 || runs === 6 ? 'boundary-btn' : ''}`}
-                  onClick={() => updateScore(runs, runs === 4 || runs === 6)}
-                >
-                  {runs}
-                </button>
-              ))}
-            </div>
-            
-            <div className="special-buttons">
-              <button className="extra-btn wide-btn" onClick={handleWide}>
-                Wide
-              </button>
-              <button className="extra-btn no-ball-btn" onClick={handleNoBall}>
-                No Ball
-              </button>
-              <button className="wicket-btn" onClick={handleWicket}>
-                Wicket
-              </button>
-            </div>
-          </div>
+      
           
           <div className="match-history">
             <h3>Match Events</h3>
