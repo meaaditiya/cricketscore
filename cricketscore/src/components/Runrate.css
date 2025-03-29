@@ -1,158 +1,409 @@
-.cricket-calculator {
-  max-width: 600px;
-  margin: 0 auto;
-  padding: 20px;
-  background-color: #f4f4f4;
-  border-radius: 8px;
+/* Modern Cricket Calculator CSS */
+:root {
+  --primary-color: #2563eb;
+  --primary-light: #3b82f6;
+  --primary-dark: #1d4ed8;
+  --success-color: #10b981;
+  --warning-color: #f59e0b;
+  --danger-color: #ef4444;
+  --bg-color: #f8fafc;
+  --card-bg: #ffffff;
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --border-color: #e2e8f0;
+  --accent-color: #8b5cf6;
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --radius: 0.5rem;
+  --radius-sm: 0.25rem;
+  --transition: 0.2s ease-in-out;
 }
 
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+.cricket-calculator {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* Scoreboard Section */
 .scoreboard {
-  background-color: #fff;
-  border-radius: 8px;
-  padding: 15px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  margin-bottom: 15px;
+  background-color: var(--card-bg);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1.25rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.scoreboard::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 4px;
+  width: 100%;
+  background: linear-gradient(to right, var(--primary-color), var(--accent-color));
 }
 
 .main-score {
+  margin-bottom: 1rem;
+}
+
+.score-container {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.main-score h1 {
+.score-container h1 {
   font-size: 2.5rem;
-  font-weight: bold;
-  color: #333;
+  font-weight: 700;
+  color: var(--text-primary);
 }
 
 .overs-display {
   display: flex;
   align-items: center;
+  gap: 0.75rem;
+}
+
+.overs-display h2 {
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: var(--text-secondary);
 }
 
 .edit-btn {
-  background-color: #f0f0f0;
+  background: transparent;
   border: none;
-  padding: 5px 10px;
-  margin-left: 10px;
-  border-radius: 4px;
+  color: var(--text-secondary);
   cursor: pointer;
+  transition: var(--transition);
+  padding: 0.25rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.edit-btn:hover {
+  color: var(--primary-color);
+  background-color: var(--border-color);
 }
 
 .target-info {
-  margin-top: 15px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.target-info h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
 }
 
 .run-rates {
   display: flex;
-  gap: 15px;
+  gap: 1rem;
 }
 
-.highlight {
-  font-weight: bold;
-  color: #007bff;
+.run-rates p {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
 }
 
-.danger {
-  color: #dc3545;
-  font-weight: bold;
+.run-rates .highlight {
+  font-weight: 600;
+  color: var(--primary-color);
 }
 
-.warning {
-  color: #ffc107;
-  font-weight: bold;
+.run-rates .success {
+  color: var(--success-color);
+  font-weight: 600;
 }
 
-.success {
-  color: #28a745;
-  font-weight: bold;
+.run-rates .warning {
+  color: var(--warning-color);
+  font-weight: 600;
+}
+
+.run-rates .danger {
+  color: var(--danger-color);
+  font-weight: 600;
 }
 
 .match-status {
-  margin-top: 15px;
-  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
+.match-status p {
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.win-probability {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+.win-probability .icon {
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+.high-probability {
+  background-color: rgba(16, 185, 129, 0.1);
+  color: var(--success-color);
+}
+
+.medium-probability {
+  background-color: rgba(245, 158, 11, 0.1);
+  color: var(--warning-color);
+}
+
+.low-probability {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: var(--danger-color);
+}
+
+/* Edit panel */
 .edit-panel {
-  background-color: #fff;
-  border-radius: 8px;
-  padding: 15px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  background-color: var(--card-bg);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1.25rem;
+}
+
+.edit-panel h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--text-primary);
 }
 
 .edit-form {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 15px;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
 }
 
 .edit-field {
   display: flex;
   flex-direction: column;
+  gap: 0.5rem;
 }
 
 .edit-field label {
-  margin-bottom: 5px;
-  font-weight: bold;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-secondary);
 }
 
 .edit-field input {
-  padding: 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  padding: 0.625rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background-color: var(--bg-color);
+  font-size: 0.95rem;
+  width: 100%;
+  transition: var(--transition);
+}
+
+.edit-field input:focus {
+  outline: none;
+  border-color: var(--primary-light);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
 }
 
 .edit-actions {
   display: flex;
-  justify-content: space-between;
-  margin-top: 15px;
+  justify-content: flex-end;
+  gap: 0.75rem;
 }
 
 .cancel-btn, .save-btn {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 4px;
+  padding: 0.625rem 1.25rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  font-weight: 500;
   cursor: pointer;
+  transition: var(--transition);
 }
 
 .cancel-btn {
-  background-color: #6c757d;
-  color: white;
+  background-color: var(--bg-color);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+}
+
+.cancel-btn:hover {
+  background-color: var(--border-color);
 }
 
 .save-btn {
-  background-color: #28a745;
+  background-color: var(--primary-color);
+  border: 1px solid var(--primary-color);
   color: white;
 }
 
+.save-btn:hover {
+  background-color: var(--primary-dark);
+}
+
+/* Run buttons */
+.run-buttons {
+  background-color: var(--card-bg);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.normal-runs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+}
+
+.run-btn {
+  padding: 0.75rem 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background-color: var(--bg-color);
+  cursor: pointer;
+  transition: var(--transition);
+  color: var(--text-primary);
+}
+
+.run-btn:hover {
+  transform: translateY(-2px);
+  background-color: var(--border-color);
+}
+
+.boundary-btn {
+  background-color: rgba(139, 92, 246, 0.1);
+  color: var(--accent-color);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+.boundary-btn:hover {
+  background-color: rgba(139, 92, 246, 0.2);
+}
+
+.special-buttons {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+}
+
+.extra-btn, .wicket-btn {
+  padding: 0.625rem 0;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: var(--transition);
+  border: none;
+}
+
+.extra-btn {
+  background-color: rgba(59, 130, 246, 0.1);
+  color: var(--primary-color);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.extra-btn:hover {
+  background-color: rgba(59, 130, 246, 0.2);
+}
+
+.wicket-btn {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: var(--danger-color);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.wicket-btn:hover {
+  background-color: rgba(239, 68, 68, 0.2);
+}
+
+/* Last over */
 .last-over {
-  background-color: #fff;
-  border-radius: 8px;
-  padding: 15px;
-  margin-top: 15px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  background-color: var(--card-bg);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1.25rem;
 }
 
 .over-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
+  margin-bottom: 1rem;
+}
+
+.over-header h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
 }
 
 .undo-btn {
-  background-color: #ffc107;
-  border: none;
-  padding: 5px 10px;
-  border-radius: 4px;
-  cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 0.375rem;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background-color: var(--bg-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.undo-btn:hover:not(:disabled) {
+  background-color: var(--border-color);
+  color: var(--text-primary);
 }
 
 .undo-btn:disabled {
@@ -162,215 +413,359 @@
 
 .balls-container {
   display: flex;
-  gap: 5px;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  min-height: 2.5rem;
+}
+
+.empty-over {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  font-style: italic;
 }
 
 .ball-result {
-  padding: 5px 10px;
-  border-radius: 4px;
-  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  font-size: 0.875rem;
+  font-weight: 600;
+  background-color: var(--bg-color);
+  border: 1px solid var(--border-color);
 }
 
 .ball-result.wicket {
-  background-color: #dc3545;
-  color: white;
+  background-color: rgba(239, 68, 68, 0.1);
+  color: var(--danger-color);
+  border: 1px solid rgba(239, 68, 68, 0.2);
 }
 
 .ball-result.boundary {
-  background-color: #28a745;
-  color: white;
+  background-color: rgba(139, 92, 246, 0.1);
+  color: var(--accent-color);
+  border: 1px solid rgba(139, 92, 246, 0.2);
 }
 
 .ball-result.extra {
-  background-color: #ffc107;
-  color: black;
+  background-color: rgba(59, 130, 246, 0.1);
+  color: var(--primary-color);
+  border: 1px solid rgba(59, 130, 246, 0.2);
 }
 
-.over-stats {
-  background-color: #fff;
-  border-radius: 8px;
-  padding: 15px;
-  margin-top: 15px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+/* Accordion */
+.accordion-container {
+  background-color: var(--card-bg);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
 }
 
-.over-stats table {
+.accordion-toggle {
   width: 100%;
-  border-collapse: collapse;
-}
-
-.over-stats th, .over-stats td {
-  border: 1px solid #ddd;
-  padding: 8px;
-  text-align: center;
-}
-
-.settings-panel {
+  padding: 1.25rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 15px;
-  background-color: #fff;
-  border-radius: 8px;
-  padding: 15px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.input-group {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.input-group select, .input-group input {
-  padding: 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-}
-
-.reset-btn {
-  position:relative;
-  top:0px;
-  right:-10px;
-  background-color: #dc3545;
-  color: white;
+  background-color: var(--card-bg);
   border: none;
-  padding: 1px 1px;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  gap: 5px;
+  text-align: left;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
   cursor: pointer;
+  transition: var(--transition);
 }
 
-.run-buttons {
-  margin-top: 15px;
+.accordion-toggle:hover {
+  background-color: rgba(0, 0, 0, 0.02);
 }
 
-.normal-runs {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin-bottom: 15px;
+.accordion-toggle .icon {
+  transition: transform var(--transition);
 }
 
-.run-btn {
-  padding: 10px 15px;
-  border: none;
-  border-radius: 4px;
-  background-color: #007bff;
-  color: white;
-  cursor: pointer;
+.accordion-toggle .icon.rotated {
+  transform: rotate(90deg);
 }
 
-.run-btn.boundary-btn {
-  background-color: #28a745;
+.accordion-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
 }
 
-.special-buttons {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
+.accordion-content.open {
+  max-height: 1000px;
 }
 
-.extra-btn, .wicket-btn {
-  padding: 10px 15px;
-  border: none;
-  border-radius: 4px;
-  color: white;
-  cursor: pointer;
+/* Stats and Settings */
+.over-stats-container, .settings-panel, .match-history {
+  padding: 1.25rem;
+  border-top: 1px solid var(--border-color);
 }
 
-.wide-btn {
-  background-color: #17a2b8;
-}
-
-.no-ball-btn {
-  background-color: #ffc107;
-  color: black;
-}
-
-.wicket-btn {
-  background-color: #dc3545;
-}
-
-.match-history {
-  background-color: #fff;
-  border-radius: 8px;
-  padding: 15px;
-  margin-top: 15px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.history-container {
-  max-height: 200px;
-  overflow-y: auto;
-}
-
-.history-balls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-}
-
-.history-ball {
-  padding: 5px 10px;
-  border-radius: 4px;
-  font-weight: bold;
-}
-
-.history-ball.wicket {
-  background-color: #dc3545;
-  color: white;
-}
-
-.history-ball.boundary {
-  background-color: #28a745;
-  color: white;
-}
-
-.history-ball.extra {
-  background-color: #ffc107;
-  color: black;
-}
-
-.empty-history {
-  text-align: center;
-  color: #6c757d;
-}
-
-.win-probability {
-  font-weight: bold;
-  color: #28a745;
-}
-.over-stats-container {
-  background-color: var(--white-bg);
-  border-radius: 12px;
-  padding: 15px;
-  margin-top: 15px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+.over-stats-container h3, .settings-panel h3, .match-history h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--text-primary);
 }
 
 .over-stats-scroll {
   max-height: 200px;
   overflow-y: auto;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
 }
 
-.over-stats-scroll table {
+.over-stats-scroll::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.over-stats-scroll::-webkit-scrollbar-track {
+  background: var(--bg-color);
+}
+
+.over-stats-scroll::-webkit-scrollbar-thumb {
+  background-color: var(--border-color);
+  border-radius: 20px;
+}
+
+table {
   width: 100%;
   border-collapse: collapse;
 }
 
-.over-stats-scroll thead {
+table th, table td {
+  padding: 0.625rem;
+  text-align: center;
+  font-size: 0.875rem;
+}
+
+table th {
+  background-color: var(--bg-color);
+  font-weight: 600;
+  color: var(--text-secondary);
   position: sticky;
   top: 0;
-  background-color: var(--light-bg);
   z-index: 1;
 }
 
-.over-stats-scroll th,
-.over-stats-scroll td {
-  border: 1px solid #ddd;
-  padding: 10px;
+table tr:nth-child(even) {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+.no-data, .empty-history {
+  padding: 1rem;
   text-align: center;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.settings-form {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.input-group label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.input-group input, .input-group select {
+  padding: 0.625rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background-color: var(--bg-color);
+  font-size: 0.95rem;
+  width: 100%;
+  transition: var(--transition);
+}
+
+.input-group input:focus, .input-group select:focus {
+  outline: none;
+  border-color: var(--primary-light);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.reset-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  width: 100%;
+  font-size: 0.875rem;
+  font-weight: 500;
+  background-color: rgba(239, 68, 68, 0.1);
+  color: var(--danger-color);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.reset-btn:hover {
+  background-color: rgba(239, 68, 68, 0.2);
+}
+
+.history-container {
+  max-height: 150px;
+  overflow-y: auto;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem;
+}
+
+.history-container::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.history-container::-webkit-scrollbar-track {
+  background: var(--bg-color);
+}
+
+.history-container::-webkit-scrollbar-thumb {
+  background-color: var(--border-color);
+  border-radius: 20px;
+}
+
+.history-balls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.history-ball {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 50%;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background-color: var(--bg-color);
+  border: 1px solid var(--border-color);
+}
+
+.history-ball.wicket {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: var(--danger-color);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.history-ball.boundary {
+  background-color: rgba(139, 92, 246, 0.1);
+  color: var(--accent-color);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+.history-ball.extra {
+  background-color: rgba(59, 130, 246, 0.1);
+  color: var(--primary-color);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+  .cricket-calculator {
+    padding: 0.75rem;
+    gap: 1rem;
+  }
+  
+  .scoreboard {
+    padding: 1rem;
+  }
+  
+  .score-container h1 {
+    font-size: 2rem;
+  }
+  
+  .overs-display h2 {
+    font-size: 1rem;
+  }
+  
+  .run-buttons, .last-over, .edit-panel, .over-stats-container, .settings-panel, .match-history {
+    padding: 1rem;
+  }
+  
+  .edit-form, .settings-form {
+    grid-template-columns: 1fr;
+  }
+  
+  .normal-runs, .special-buttons {
+    gap: 0.5rem;
+  }
+  
+  .run-btn {
+    font-size: 1.1rem;
+    padding: 0.625rem 0;
+  }
+  
+  .extra-btn, .wicket-btn {
+    font-size: 0.75rem;
+  }
+  
+  .over-header h3, .settings-panel h3, .over-stats-container h3, .match-history h3 {
+    font-size: 1rem;
+  }
+  
+  .accordion-toggle {
+    padding: 1rem;
+    font-size: 1rem;
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --primary-color: #3b82f6;
+    --primary-light: #60a5fa;
+    --primary-dark: #2563eb;
+    --bg-color: #0f172a;
+    --card-bg: #1e293b;
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --border-color: #334155;
+  }
+  
+  .edit-field input,
+  .input-group input,
+  .input-group select {
+    background-color: #1e293b;
+    color: var(--text-primary);
+  }
+  
+  .cancel-btn {
+    background-color: #334155;
+    color: var(--text-primary);
+  }
+  
+  .run-btn {
+    background-color: #1e293b;
+  }
+  
+  table th {
+    background-color: #1e293b;
+  }
+  
+  table tr:nth-child(even) {
+    background-color: rgba(255, 255, 255, 0.02);
+  }
 }
