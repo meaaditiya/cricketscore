@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Trophy, Undo2, Edit2, RefreshCw, ChevronRight, AlertTriangle } from 'lucide-react';
+import { Trophy, Undo2, Edit2, RefreshCw, ChevronRight } from 'lucide-react';
+import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+
 import './Runrate.css';
 // Main Component
 const CricketRunRateCalculator = () => {
@@ -65,7 +67,7 @@ const CricketRunRateCalculator = () => {
     return oversRemaining > 0 ? (remainingRuns / oversRemaining).toFixed(2) : 'N/A';
   };
 
-  // Enhanced Win Probability Algorithm with pitch conditions and momentum
+  // Improved Win Probability Algorithm with better scaling
   const calculateWinProbability = useMemo(() => {
     if (!targetScore) return null;
 
@@ -75,65 +77,61 @@ const CricketRunRateCalculator = () => {
     const wicketsRemaining = 10 - wickets;
 
     // Terminal conditions
-    if (remainingRuns <= 0) return 100;
-    if (wickets >= 10 || ballsRemaining <= 0) return 0;
+    if (remainingRuns <= 0) return 100; // Already won
+    if (wickets >= 10 || ballsRemaining <= 0) return 0; // All out or no balls left
 
-    // Base factors
+    // Current and required run rates
     const currentRunRate = parseFloat(calculateRunRate());
     const requiredRunRate = parseFloat(calculateRequiredRunRate());
     
-    // Calculate based on multiple factors
+    // Calculate probability based on multiple factors
     let probability = 50; // Base starting point
     
-    // Factor 1: Run rate comparison (max impact: ±20%)
-    const runRateDifference = currentRunRate - requiredRunRate;
-    probability += Math.min(Math.max(runRateDifference * 10, -20), 20);
+    // Factor 1: Run rate comparison (improved scaling)
+    if (currentRunRate > requiredRunRate) {
+      // When current RR exceeds required RR, boost probability more significantly
+      const rateDifference = currentRunRate - requiredRunRate;
+      // Higher scaling for bigger positive differences
+      probability += Math.min(rateDifference * 15, 35);
+    } else {
+      // When behind on rate, penalize more severely
+      const rateDifference = requiredRunRate - currentRunRate;
+      probability -= Math.min(rateDifference * 8, 35);
+    }
     
     // Factor 2: Wickets remaining (max impact: 20%)
     probability += (wicketsRemaining / 10) * 20;
     
-    // Factor 3: Pressure based on chase stage (max impact: ±15%)
+    // Factor 3: Chase progress (more impact in late stages)
     const chaseCompletion = ballsBowled / (totalOvers * 6);
-    if (chaseCompletion > 0.5) { // Second half of innings
-      // Higher pressure in later stages
-      const pressureFactor = (chaseCompletion - 0.5) * 2; // 0 to 1
-      
-      if (currentRunRate < requiredRunRate) {
-        // Increasing pressure if behind
-        probability -= pressureFactor * 15;
-      } else {
-        // Decreasing pressure if ahead
-        probability += pressureFactor * 10;
+    if (chaseCompletion > 0.6) { // Later stages of chase
+      if (currentRunRate > requiredRunRate * 1.2) {
+        // Significantly ahead of required rate in late stages
+        probability += 15;
+      } else if (currentRunRate < requiredRunRate * 0.8) {
+        // Significantly behind required rate in late stages
+        probability -= 15;
       }
     }
     
-    // Factor 4: Momentum (based on last 12 balls) (max impact: ±10%)
-    const recentHistory = history.slice(-12);
-    if (recentHistory.length > 0) {
-      const recentScoring = recentHistory.reduce((sum, ball) => {
-        if (ball === 'W') return sum - 5; // Wicket hurts momentum
-        if (ball === 'WD' || ball === 'NB') return sum + 1;
-        if (ball === '4') return sum + 4;
-        if (ball === '6') return sum + 6;
-        return sum + parseInt(ball || 0);
-      }, 0);
-      
-      // Calculate recent run rate
-      const recentBalls = Math.min(12, recentHistory.length);
-      const recentRunRate = (recentScoring / recentBalls) * 6;
-      
-      // Adjust momentum factor
-      const momentumImpact = Math.min(Math.max((recentRunRate - requiredRunRate) * 5, -10), 10);
-      probability += momentumImpact;
+    // Factor 4: Required runs vs balls remaining ratio
+    const runsPerBallNeeded = remainingRuns / ballsRemaining;
+    if (runsPerBallNeeded > 1.5) {
+      // Very difficult chase (more than 9 per over)
+      probability -= 15;
+    } else if (runsPerBallNeeded < 0.5) {
+      // Very easy chase (less than 3 per over)
+      probability += 15;
     }
     
-    // Factor 5: Close game adjustment
-    if (remainingRuns < 20 && ballsRemaining > remainingRuns) {
-      // Favor batting side in close games with plenty of balls
-      probability += 5;
-    }
+    // Lower bound to ensure realistic probabilities
+    // Even with extremely high RRR, should have at least some chance
+    probability = Math.max(probability, 5);
     
-    return Math.min(Math.max(Math.round(probability), 0), 100);
+    // Upper bound to prevent overly optimistic predictions
+    probability = Math.min(probability, 95);
+    
+    return Math.round(probability);
   }, [currentScore, targetScore, overs, balls, wickets, totalOvers, history]);
 
   // Get comprehensive match status with contextual information
@@ -148,15 +146,11 @@ const CricketRunRateCalculator = () => {
     if (wickets >= 10 || ballsRemaining <= 0) return "Defeat";
     
     // Contextual status based on situation
-    const requiredRunRate = parseFloat(calculateRequiredRunRate());
+  
     
-    if (ballsRemaining < 6) {
-      return `Need ${runsNeeded} from last ${ballsRemaining} ${ballsRemaining === 1 ? 'ball' : 'balls'}`;
-    } else if (requiredRunRate > 12) {
-      return `Need ${runsNeeded} runs at ${requiredRunRate} RPO (difficult)`;
-    } else {
-      return `Need ${runsNeeded} from ${Math.floor(ballsRemaining/6)}.${ballsRemaining%6} overs`;
-    }
+   
+      return `Need ${runsNeeded} from ${ballsRemaining} ${ballsRemaining === 1 ? 'ball' : 'balls'} ${"("}${(runsNeeded/(ballsRemaining)).toFixed(2)} ${"runs per ball"}${")"}`;
+  
   };
 
   // Enter Edit Mode
@@ -185,7 +179,7 @@ const CricketRunRateCalculator = () => {
     } else if (lastEvent === 'WD' || lastEvent === 'NB') {
       setCurrentScore(prev => Math.max(prev - 1, 0));
     } else {
-      const runs = lastEvent === '4' ? 4 : lastEvent === '6' ? 6 : parseInt(lastEvent || 0);
+      const runs = lastEvent === '4' ? 4 : lastEvent === '5' ? 5 : lastEvent === '6' ? 6 : parseInt(lastEvent || 0);
       setCurrentScore(prev => Math.max(prev - runs, 0));
     }
     
@@ -202,6 +196,13 @@ const CricketRunRateCalculator = () => {
       const prevOverStartIndex = Math.max(prevOverEndIndex - 6, 0);
       const prevOverBalls = newHistory.slice(prevOverStartIndex, prevOverEndIndex);
       setLastOver(prevOverBalls);
+      
+      // Remove the over from overStats if we're undoing a complete over
+      if (balls === 0) {
+        const newOverStats = [...overStats];
+        newOverStats.pop();
+        setOverStats(newOverStats);
+      }
     }
     
     // Adjust the ball/over count
@@ -236,7 +237,7 @@ const CricketRunRateCalculator = () => {
     const eventType = 
       isExtra === 'wide' ? 'WD' : 
       isExtra === 'noBall' ? 'NB' : 
-      isBoundary ? (runs === 4 ? '4' : '6') : 
+      isBoundary ? (runs === 4 ? '4' : runs === 5 ? '5' : '6') : 
       runs.toString();
     
     setHistory(prev => [...prev, eventType]);
@@ -249,7 +250,7 @@ const CricketRunRateCalculator = () => {
         const currentRunsInOver = lastOver.reduce((sum, ball) => {
           if (ball === 'W') return sum;
           if (ball === 'WD' || ball === 'NB') return sum + 1;
-          return sum + (ball === '4' ? 4 : ball === '6' ? 6 : parseInt(ball) || 0);
+          return sum + (ball === '4' ? 4 : ball === '5' ? 5 : ball === '6' ? 6 : parseInt(ball) || 0);
         }, runs);
         
         const overRunsData = {
@@ -283,7 +284,7 @@ const CricketRunRateCalculator = () => {
         runs: lastOver.reduce((sum, ball) => {
           if (ball === 'W') return sum;
           if (ball === 'WD' || ball === 'NB') return sum + 1;
-          return sum + (ball === '4' ? 4 : ball === '6' ? 6 : parseInt(ball) || 0);
+          return sum + (ball === '4' ? 4 : ball === '5' ? 5 : ball === '6' ? 6 : parseInt(ball) || 0);
         }, 0),
         wickets: lastOver.filter(ball => ball === 'W').length + 1,
         extras: lastOver.filter(ball => ['WD', 'NB'].includes(ball)).length
@@ -332,6 +333,16 @@ const CricketRunRateCalculator = () => {
     if (probability >= 75) return "high-probability";
     if (probability >= 40) return "medium-probability";
     return "low-probability";
+  };
+  const prepareCumulativeData = (overStats) => {
+    let totalRuns = 0;
+    return overStats.map(over => {
+      totalRuns += over.runs;
+      return {
+        over: over.overNumber,
+        totalRuns: totalRuns
+      };
+    });
   };
 
   return (
@@ -442,11 +453,11 @@ const CricketRunRateCalculator = () => {
         <>
           <div className="run-buttons">
             <div className="normal-runs">
-              {[0, 1, 2, 3, 4, 6].map(runs => (
+              {[0, 1, 2, 3, 4, 5, 6].map(runs => (
                 <button
                   key={runs}
-                  className={`run-btn ${runs === 4 || runs === 6 ? 'boundary-btn' : ''}`}
-                  onClick={() => updateScore(runs, runs === 4 || runs === 6)}
+                  className={`run-btn ${runs === 4 || runs === 5 || runs === 6 ? 'boundary-btn' : ''}`}
+                  onClick={() => updateScore(runs, runs === 4 || runs === 5 || runs === 6)}
                 >
                   {runs}
                 </button>
@@ -495,7 +506,7 @@ const CricketRunRateCalculator = () => {
                     key={idx} 
                     className={`ball-result ${
                       ball === 'W' ? 'wicket' : 
-                      ball === '4' || ball === '6' ? 'boundary' :
+                      ball === '4' || ball === '5' || ball === '6' ? 'boundary' :
                       ball === 'WD' || ball === 'NB' ? 'extra' : ''
                     }`}
                   >
@@ -515,35 +526,66 @@ const CricketRunRateCalculator = () => {
             </button>
             
             <div className={`accordion-content ${isMenuOpen ? 'open' : ''}`}>
-              <div className="over-stats-container">
-                <h3>Over-by-Over Analysis</h3>
-                <div className="over-stats-scroll">
-                  {overStats.length === 0 ? (
-                    <p className="no-data">No completed overs yet</p>
-                  ) : (
-                    <table>
-                      <thead>
-                        <tr>
-                          <th>Over</th>
-                          <th>Runs</th>
-                          <th>Wickets</th>
-                          <th>Extras</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {overStats.map((over, index) => (
-                          <tr key={index}>
-                            <td>{over.overNumber}</td>
-                            <td>{over.runs}</td>
-                            <td>{over.wickets}</td>
-                            <td>{over.extras}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  )}
-                </div>
-              </div>
+            <div className="over-stats-container">
+  <h3>Over-by-Over Analysis</h3>
+  
+  {overStats.length === 0 ? (
+    <p className="no-data">No completed overs yet</p>
+  ) : (
+    <>
+      <div className="charts-container">
+        <div className="chart-section">
+          <h4>Runs Per Over</h4>
+          <ResponsiveContainer width="100%" height={180}>
+            <BarChart data={overStats} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="overNumber" label={{ value: 'Over', position: 'insideBottom', offset: -5 }} />
+              <YAxis label={{ value: 'Runs', angle: -90, position: 'insideLeft' }} />
+              <Tooltip formatter={(value) => [`${value} runs`, 'Runs']} />
+              <Bar dataKey="runs" fill="#3b82f6" radius={[4, 4, 0, 0]} barSize={8} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+        
+        <div className="chart-section">
+          <h4>Cumulative Runs</h4>
+          <ResponsiveContainer width="100%" height={180}>
+            <LineChart data={prepareCumulativeData(overStats)} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="over" label={{ value: 'Over', position: 'insideBottom', offset: -5 }} />
+              <YAxis label={{ value: 'Total Runs', angle: -90, position: 'insideLeft' }} />
+              <Tooltip formatter={(value) => [`${value} runs`, 'Total']} />
+              <Line type="monotone" dataKey="totalRuns" stroke="#10b981" strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 5 }} />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+      
+      <div className="over-stats-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Over</th>
+              <th>Runs</th>
+              <th>Wickets</th>
+              <th>Extras</th>
+            </tr>
+          </thead>
+          <tbody>
+            {overStats.map((over, index) => (
+              <tr key={index}>
+                <td>{over.overNumber}</td>
+                <td>{over.runs}</td>
+                <td>{over.wickets}</td>
+                <td>{over.extras}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
+  )}
+</div>
               
               <div className="settings-panel">
                 <h3>Match Settings</h3>
@@ -595,7 +637,7 @@ const CricketRunRateCalculator = () => {
                           key={idx} 
                           className={`history-ball ${
                             event === 'W' ? 'wicket' : 
-                            event === '4' || event === '6' ? 'boundary' :
+                            event === '4' || event === '5' || event === '6' ? 'boundary' :
                             event === 'WD' || event === 'NB' ? 'extra' : ''
                           }`}
                         >
